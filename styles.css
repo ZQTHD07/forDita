@@ -1,0 +1,75 @@
+/* styles.css */
+
+/* 1. Import font romantis */
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&display=swap');
+
+:root {
+  --primary-color: #f8bbd0;
+  --text-color: #4e342e;
+  --btn-bg: rgba(255,255,255,0.6);
+  --btn-hover-bg: rgba(255,255,255,0.8);
+}
+
+* { box-sizing: border-box; margin:0; padding:0; }
+
+html, body {
+  width:100%; height:100%;
+  font-family: 'Dancing Script', cursive;
+  background: var(--primary-color);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Pesan di tengah */
+#message {
+  position: relative; z-index:10;
+  max-width:80%; margin:20vh auto 0;
+  text-align:center;
+  font-size:2.5rem;
+  color: var(--text-color);
+  text-shadow:1px 1px 4px rgba(255,255,255,0.6);
+  transition: opacity 0.8s ease;
+}
+
+/* Tombol */
+.btn {
+  position: relative; z-index:10;
+  margin:15px 10px; padding:10px 24px;
+  font-family: 'Great Vibes', cursive;
+  font-size:1.5rem;
+  color: var(--text-color);
+  background: var(--btn-bg);
+  border:2px solid var(--text-color);
+  border-radius:30px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+.btn:hover {
+  background: var(--btn-hover-bg);
+  transform: scale(1.05);
+}
+
+/* Foto overlay */
+.photo {
+  position: absolute;
+  object-fit: cover;
+  border: 4px solid #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+  opacity: 0;
+  transition: opacity 1s ease;
+  animation: wave 4s ease-in-out infinite alternate;
+}
+/* Tampilkan foto */
+.photo.visible { opacity: 1; }
+
+/* Posisi & ukuran tiga foto */
+#photo1 { top: 20px; right: 20px; width: 120px; height: 120px; }
+#photo2 { left: 20px; top: 50%; transform: translateY(-50%); width: 160px; height: 160px; }
+#photo3 { bottom: 20px; right: 20px; width: 120px; height: 120px; }
+
+/* Efek “waving” */
+@keyframes wave {
+  from { transform: translateY(0) rotate(0deg); }
+  to   { transform: translateY(-10px) rotate(3deg); }
+}
