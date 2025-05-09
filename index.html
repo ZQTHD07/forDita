@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Surprise untukmu!</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="message"></div>
+  <div>
+    <button class="btn" id="prev">Back</button>
+    <button class="btn" id="next">Next</button>
+  </div>
+
+  <!-- Tiga elemen foto overlay -->
+  <img id="photo1" class="photo" src="" alt="">
+  <img id="photo2" class="photo" src="" alt="">
+  <img id="photo3" class="photo" src="" alt="">
+
+  <!-- Audio romantis (tanpa fallback text) -->
+  <audio id="audio" loop>
+    <source src="lagu.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // === CUSTOMIZE ISI DI SINI ===
+    const messages = [
+      "Selamat ulang tahun, sayang! 🎂",
+      "Hari ini aku mau bilang…",
+      "Terima kasih sudah selalu ada di sisiku.",
+      "Aku mencintaimu lebih dari kata-kata bisa ungkapkan ❤️"
+    ];
+    // Setiap sub-array adalah tiga nama file foto (urut sesuai #photo1,2,3)
+    const photoSets = [
+      ["bg1a.jpg","bg1b.jpg","bg1c.jpg"],
+      ["bg2a.jpg","bg2b.jpg","bg2c.jpg"],
+      ["bg3a.jpg","bg3b.jpg","bg3c.jpg"],
+      ["bg4a.jpg","bg4b.jpg","bg4c.jpg"]
+    ];
+    // =============================
+
+    let idx = 0;
+    const msgEl = document.getElementById('message');
+    const photos = [
+      document.getElementById('photo1'),
+      document.getElementById('photo2'),
+      document.getElementById('photo3')
+    ];
+    const audio = document.getElementById('audio');
+
+    function render() {
+      // Ganti teks
+      msgEl.textContent = messages[idx];
+      // Ganti src + fade-in foto
+      photos.forEach((el,i) => {
+        el.classList.remove('visible');
+        el.src = photoSets[idx][i];
+        void el.offsetWidth;  // trigger reflow supaya transition berjalan
+        el.classList.add('visible');
+      });
+    }
+
+    // Tombol Next/Back
+    document.getElementById('next').onclick = () => {
+      idx = (idx + 1) % messages.length;
+      render();
+      if (audio.paused) audio.play();
+    };
+    document.getElementById('prev').onclick = () => {
+      idx = (idx - 1 + messages.length) % messages.length;
+      render();
+    };
+
+    // Render pertama & start interval 15 detik
+    render();
+    setInterval(() => {
+      idx = (idx + 1) % messages.length;
+      render();
+    }, 15000);
+  </script>
+</body>
+</html>
