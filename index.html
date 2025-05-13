@@ -2,88 +2,221 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Surprise untukmu!</title>
-  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #f8bbd0;
+      --text-color: #4e342e;
+      --btn-bg: rgba(255,255,255,0.6);
+      --btn-hover-bg: rgba(255,255,255,0.8);
+    }
+
+    * { box-sizing: border-box; margin:0; padding:0; }
+
+    html, body {
+      width:100%; height:100%;
+      font-family: 'Dancing Script', cursive;
+      background: var(--primary-color);
+      overflow: hidden;
+      position: relative;
+    }
+
+    #message {
+      position: relative; z-index:10;
+      max-width:80%; margin:20vh auto 0;
+      text-align:center;
+      font-size:2.5rem;
+      color: var(--text-color);
+      text-shadow:1px 1px 4px rgba(255,255,255,0.6);
+      min-height: 3em;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: .15em solid var(--text-color);
+      animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+    }
+
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: var(--text-color); }
+    }
+
+    #button-container {
+      position: relative;
+      z-index: 10;
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .btn {
+      margin:15px 10px; padding:10px 24px;
+      font-family: 'Great Vibes', cursive;
+      font-size:1.5rem;
+      color: var(--text-color);
+      background: var(--btn-bg);
+      border:2px solid var(--text-color);
+      border-radius:30px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .btn:hover {
+      background: var(--btn-hover-bg);
+      transform: scale(1.05);
+    }
+
+    .photo-wrapper {
+      position: absolute;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    #wrap1 { top: 20px; right: 20px; width: 22vw; height: 22vw; }
+    #wrap2 { left: 20px; top: 50%; transform: translateY(-50%); width: 28vw; height: 28vw; }
+    #wrap3 { bottom: 20px; right: 20px; width: 22vw; height: 22vw; }
+
+    .photo {
+      position: absolute;
+      object-fit: cover;
+      width: 100%; height: 100%;
+      border: 4px solid #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .photo.active {
+      opacity: 1;
+      z-index: 1;
+    }
+
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+  </style>
 </head>
 <body>
+  <div id="particles-js"></div>
   <div id="message"></div>
   <div id="button-container">
     <button class="btn" id="prev">Back</button>
     <button class="btn" id="next">Next</button>
   </div>
 
+  <!-- Tiga lokasi dengan dua lapisan gambar untuk crossfade -->
+  <div class="photo-wrapper" id="wrap1">
+    <img class="photo layer0" src="" alt="">
+    <img class="photo layer1" src="" alt="">
+  </div>
+  <div class="photo-wrapper" id="wrap2">
+    <img class="photo layer0" src="" alt="">
+    <img class="photo layer1" src="" alt="">
+  </div>
+  <div class="photo-wrapper" id="wrap3">
+    <img class="photo layer0" src="" alt="">
+    <img class="photo layer1" src="" alt="">
+  </div>
 
-  <!-- Tiga elemen foto overlay -->
-  <img id="photo1" class="photo" src="" alt="">
-  <img id="photo2" class="photo" src="" alt="">
-  <img id="photo3" class="photo" src="" alt="">
-
-  <!-- Audio romantis (tanpa fallback text) -->
-  <audio id="audio" loop>
+  <audio id="audio" loop autoplay muted>
     <source src="lagu.mp3" type="audio/mpeg">
   </audio>
 
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
   <script>
-  // === DAFTAR PESAN DAN FOTO ===
-  const messages = [
-    "Selamat ulang tahun, sayang! 🎂",
-    "Hari ini aku mau bilang…",
-    "Terima kasih sudah selalu ada di sisiku.",
-    "Aku mencintaimu lebih dari kata-kata bisa ungkapkan ❤️"
-  ];
-  
-  // 10 foto untuk rotasi
-  const photoList = [
-    "bg1.jpg", "bg2.jpg", "bg3.jpg", "bg4.jpg", "bg5.jpg",
-    "bg6.jpg", "bg7.jpg", "bg8.jpg", "bg9.jpg", "bg10.jpg"
-  ];
+    const messages = [
+      "Selamat ulang tahun, sayang! 🎂",
+      "Hari ini aku mau bilang…",
+      "Terima kasih sudah selalu ada di sisiku.",
+      "Aku mencintaimu lebih dari kata-kata bisa ungkapkan ❤️"
+    ];
 
-  // Elemen DOM
-  const msgEl = document.getElementById('message');
-  const photos = [
-    document.getElementById('photo1'),
-    document.getElementById('photo2'),
-    document.getElementById('photo3')
-  ];
-  const audio = document.getElementById('audio');
+    const photoList = [
+      "bg1.jpg", "bg2.jpg", "bg3.jpg", "bg4.jpg", "bg5.jpg",
+      "bg6.jpg", "bg7.jpg", "bg8.jpg", "bg9.jpg", "bg10.jpg"
+    ];
 
-  // Indeks pesan dan indeks foto
-  let msgIdx = 0;
-  let photoIndices = [0, 1, 2]; // index awal untuk masing-masing lokasi foto
+    const msgEl = document.getElementById('message');
+    const audio = document.getElementById('audio');
+    const photoIndices = [0, 1, 2];
 
-  function updatePhotos() {
-    for (let i = 0; i < photos.length; i++) {
-      photos[i].classList.remove('visible');
-      photoIndices[i] = (photoIndices[i] + 1) % photoList.length;
-      photos[i].src = photoList[photoIndices[i]];
-      void photos[i].offsetWidth; // trigger reflow untuk transisi
-      photos[i].classList.add('visible');
+    function renderMessage() {
+      msgEl.style.animation = 'none';
+      void msgEl.offsetWidth; // trigger reflow to restart animation
+      msgEl.textContent = messages[msgIdx];
+      msgEl.style.animation = null;
     }
-  }
 
-  function renderMessage() {
-    msgEl.textContent = messages[msgIdx];
-  }
+    document.getElementById('next').onclick = () => {
+      msgIdx = (msgIdx + 1) % messages.length;
+      renderMessage();
+      if (audio.paused) audio.play();
+    };
 
-  // Tombol navigasi pesan
-  document.getElementById('next').onclick = () => {
-    msgIdx = (msgIdx + 1) % messages.length;
+    document.getElementById('prev').onclick = () => {
+      msgIdx = (msgIdx - 1 + messages.length) % messages.length;
+      renderMessage();
+    };
+
+    function updatePhotos() {
+      for (let i = 0; i < 3; i++) {
+        const wrap = document.getElementById(`wrap${i + 1}`);
+        const layers = wrap.querySelectorAll('img');
+
+        const [current, next] = layers[0].classList.contains('active') 
+          ? [layers[0], layers[1]] 
+          : [layers[1], layers[0]];
+
+        photoIndices[i] = (photoIndices[i] + 1) % photoList.length;
+        next.src = photoList[photoIndices[i]];
+
+        next.classList.add('active');
+        current.classList.remove('active');
+      }
+    }
+
+    let msgIdx = 0;
     renderMessage();
-    if (audio.paused) audio.play();
-  };
+    updatePhotos();
+    setInterval(updatePhotos, 5000);
 
-  document.getElementById('prev').onclick = () => {
-    msgIdx = (msgIdx - 1 + messages.length) % messages.length;
-    renderMessage();
-  };
-
-  // Inisialisasi
-  renderMessage();
-  updatePhotos(); // tampilkan pertama kali
-
-  // Rotasi foto setiap 5 detik
-  setInterval(updatePhotos, 5000);
+    // Initialize particle.js
+    particlesJS("particles-js", {
+      "particles": {
+        "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
+        "color": { "value": ["#ffffff", "#ffb6c1", "#ffc0cb"] },
+        "shape": { "type": "circle" },
+        "opacity": { "value": 0.4, "random": true },
+        "size": { "value": 3.5, "random": true },
+        "line_linked": { "enable": false },
+        "move": {
+          "enable": true,
+          "speed": 0.5,
+          "direction": "none",
+          "random": true,
+          "straight": false,
+          "out_mode": "out"
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": { "enable": false },
+          "onclick": { "enable": false },
+          "resize": true
+        }
+      },
+      "retina_detect": true
+    });
   </script>
 </body>
 </html>
