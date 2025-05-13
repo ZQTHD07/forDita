@@ -31,6 +31,13 @@ html, body {
   transition: opacity 0.8s ease;
 }
 
+#button-container {
+  position: relative;
+  z-index: 10;
+  margin-top: 40px;
+  text-align: center;
+}
+
 /* Tombol */
 .btn {
   position: relative; z-index:10;
