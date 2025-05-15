@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Surprise untukmu!</title>
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script :wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary-color: #f8bbd0;
@@ -25,15 +25,13 @@
 
     #message {
       position: relative; z-index:10;
-      max-width:80%; margin:20vh auto 0;
+      max-width:90%; margin:20vh auto 0;
       text-align:center;
-      font-size:2.5rem;
+      font-size: clamp(1.5rem, 5vw, 2.5rem); /* Responsif */
       color: var(--text-color);
       text-shadow:1px 1px 4px rgba(255,255,255,0.6);
       min-height: 3em;
-      white-space: nowrap;
-      overflow: hidden;
-      border-right: .15em solid var(--text-color);
+      overflow: visible; /* Biarkan teks wrap */
       animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
     }
 
@@ -73,18 +71,19 @@
 
     .photo-wrapper {
       position: absolute;
-      width: 100%; height: 100%;
+      width: 20%; /* Ubah dari vw ke % */
+      height: auto;
       pointer-events: none;
     }
 
-    #wrap1 { top: 20px; right: 20px; width: 22vw; height: 22vw; }
-    #wrap2 { left: 20px; top: 50%; transform: translateY(-50%); width: 28vw; height: 28vw; }
-    #wrap3 { bottom: 20px; right: 20px; width: 22vw; height: 22vw; }
+    #wrap1 { top: 20px; right: 20px; }
+    #wrap2 { left: 20px; top: 50%; transform: translateY(-50%); }
+    #wrap3 { bottom: 20px; right: 20px; }
 
     .photo {
       position: absolute;
       object-fit: cover;
-      width: 100%; height: 100%;
+      width: 100%; height: auto;
       border: 4px solid #fff;
       border-radius: 12px;
       box-shadow: 0 6px 15px rgba(0,0,0,0.3);
@@ -105,6 +104,22 @@
       left: 0;
       z-index: 0;
     }
+
+    /* Responsivitas */
+    @media (max-width: 768px) {
+      .photo-wrapper {
+        width: 30%;
+      }
+
+      #message {
+        font-size: 2rem;
+        margin-top: 10vh;
+      }
+
+      #button-container {
+        margin-top: 20px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -115,28 +130,28 @@
   <div id="button-container">
     <button class="btn" id="prev">Back</button>
     <button class="btn" id="next">Next</button>
+    <button id="unmute-btn" class="btn" style="display: none;">🔊 Aktifkan Suara</button>
   </div>
 
-  <!-- Tiga lokasi dengan dua lapisan gambar untuk crossfade -->
+  <!-- Foto -->
   <div class="photo-wrapper" id="wrap1">
-    <img class="photo layer0" src="" alt="">
-    <img class="photo layer1" src="" alt="">
+    <img class="photo layer0" src="bg1.jpg" alt="">
+    <img class="photo layer1" src="bg2.jpg" alt="">
   </div>
   <div class="photo-wrapper" id="wrap2">
-    <img class="photo layer0" src="" alt="">
-    <img class="photo layer1" src="" alt="">
+    <img class="photo layer0" src="bg3.jpg" alt="">
+    <img class="photo layer1" src="bg4.jpg" alt="">
   </div>
   <div class="photo-wrapper" id="wrap3">
-    <img class="photo layer0" src="" alt="">
-    <img class="photo layer1" src="" alt="">
+    <img class="photo layer0" src="bg5.jpg" alt="">
+    <img class="photo layer1" src="bg6.jpg" alt="">
   </div>
 
-  <audio id="audio" loop autoplay muted>
-  <source src="lagu.mp3" type="audio/mpeg">
-  Browser Anda tidak mendukung audio.
+  <audio id="audio" loop muted>
+    <source src="lagu.mp3" type="audio/mpeg">
   </audio>
 
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.5.2/particles.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js @2.5.2/particles.min.js"></script>
   <script>
     const messages = [
       "Selamat ulang tahun, sayang! 🎂",
@@ -154,6 +169,7 @@
 
     const msgEl = document.getElementById('message');
     const audio = document.getElementById('audio');
+    const unmuteBtn = document.getElementById('unmute-btn');
     let msgIdx = 0;
 
     function renderMessage() {
@@ -167,7 +183,6 @@
       }, 3500);
     }
 
-    // Fungsi typewriting dengan JavaScript (opsional)
     function startTyping(text, element, speed = 100) {
       let i = 0;
       element.textContent = '';
@@ -210,15 +225,22 @@
       }
     }
 
-    // Start with first message
     window.onload = () => {
+      audio.play().catch(error => {
+        console.error("Gagal memutar audio:", error);
+      });
+
       renderMessage();
       startTyping(messages[msgIdx], msgEl, 100);
       updatePhotos();
       setInterval(updatePhotos, 5000);
+
+      // Tampilkan tombol unmute setelah audio mulai
+      audio.onplay = () => {
+        unmuteBtn.style.display = 'inline-block';
+      };
     };
 
-    // Initialize particle.js
     particlesJS("particles-js", {
       "particles": {
         "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
