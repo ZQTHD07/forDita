@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Surprise untukmu!</title>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
@@ -65,6 +65,7 @@
       cursor: pointer;
       transition: background 0.3s ease, transform 0.2s ease;
     }
+
     .btn:hover {
       background: var(--btn-hover-bg);
       transform: scale(1.05);
@@ -90,6 +91,7 @@
       opacity: 0;
       transition: opacity 1s ease;
     }
+
     .photo.active {
       opacity: 1;
       z-index: 1;
@@ -107,7 +109,9 @@
 </head>
 <body>
   <div id="particles-js"></div>
-  <div id="message"></div>
+
+  <div id="message" class="typing-complete"></div>
+
   <div id="button-container">
     <button class="btn" id="prev">Back</button>
     <button class="btn" id="next">Next</button>
@@ -128,17 +132,18 @@
   </div>
 
   <audio id="audio" loop autoplay muted>
-    <source src="lagu.mp3" type="audio/mpeg">
+  <source src="lagu.mp3" type="audio/mpeg">
+  Browser Anda tidak mendukung audio.
   </audio>
 
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.5.2/particles.min.js"></script>
   <script>
     const messages = [
       "Selamat ulang tahun, sayang! 🎂",
       "Hari ini aku mau bilang…",
       "Terima kasih sudah selalu ada di sisiku.",
-      "Aku mencintaimu lebih dari kata-kata bisa ungkapkan ❤️"
-      "Semoga apa yang ayang cita-citakan, semua doa ayang terkabul, aamiin"
+      "Aku mencintaimu lebih dari kata-kata bisa ungkapkan ❤️",
+      "Semoga apa yang ayang cita-citakan, semua doa ayang terkabul, aamiin",
       "Luv u Sayangkuu, cintakuuu, cantikkuuu"
     ];
 
@@ -149,24 +154,44 @@
 
     const msgEl = document.getElementById('message');
     const audio = document.getElementById('audio');
-    const photoIndices = [0, 1, 2];
+    let msgIdx = 0;
 
     function renderMessage() {
+      msgEl.textContent = '';
       msgEl.style.animation = 'none';
-      void msgEl.offsetWidth; // trigger reflow to restart animation
-      msgEl.textContent = messages[msgIdx];
-      msgEl.style.animation = null;
+      void msgEl.offsetWidth;
+      msgEl.style.animation = 'typing 3.5s steps(40, end), blink-caret .75s step-end infinite';
+
+      setTimeout(() => {
+        msgEl.classList.add('typing-complete');
+      }, 3500);
+    }
+
+    // Fungsi typewriting dengan JavaScript (opsional)
+    function startTyping(text, element, speed = 100) {
+      let i = 0;
+      element.textContent = '';
+      function type() {
+        if (i < text.length) {
+          element.textContent += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        }
+      }
+      type();
     }
 
     document.getElementById('next').onclick = () => {
       msgIdx = (msgIdx + 1) % messages.length;
       renderMessage();
+      startTyping(messages[msgIdx], msgEl, 100);
       if (audio.paused) audio.play();
     };
 
     document.getElementById('prev').onclick = () => {
       msgIdx = (msgIdx - 1 + messages.length) % messages.length;
       renderMessage();
+      startTyping(messages[msgIdx], msgEl, 100);
     };
 
     function updatePhotos() {
@@ -178,18 +203,20 @@
           ? [layers[0], layers[1]] 
           : [layers[1], layers[0]];
 
-        photoIndices[i] = (photoIndices[i] + 1) % photoList.length;
-        next.src = photoList[photoIndices[i]];
-
+        const randomIndex = Math.floor(Math.random() * photoList.length);
+        next.src = photoList[randomIndex];
         next.classList.add('active');
         current.classList.remove('active');
       }
     }
 
-    let msgIdx = 0;
-    renderMessage();
-    updatePhotos();
-    setInterval(updatePhotos, 5000);
+    // Start with first message
+    window.onload = () => {
+      renderMessage();
+      startTyping(messages[msgIdx], msgEl, 100);
+      updatePhotos();
+      setInterval(updatePhotos, 5000);
+    };
 
     // Initialize particle.js
     particlesJS("particles-js", {
