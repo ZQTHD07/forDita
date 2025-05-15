@@ -70,8 +70,9 @@
     }
 
     .photo-wrapper {
-      position: absolute;
-      width: 20%; /* Ubah dari vw ke % */
+      position: fixed;
+      width: 15%;
+      max-width: 150px;
       height: auto;
       pointer-events: none;
     }
@@ -83,7 +84,9 @@
     .photo {
       position: absolute;
       object-fit: cover;
-      width: 100%; height: auto;
+      width: 100%;
+      height: auto;
+      max-height: 150px; /* Batas tinggi */
       border: 4px solid #fff;
       border-radius: 12px;
       box-shadow: 0 6px 15px rgba(0,0,0,0.3);
