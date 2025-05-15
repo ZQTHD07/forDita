@@ -89,8 +89,14 @@
       box-shadow: 0 6px 15px rgba(0,0,0,0.3);
       opacity: 0;
       transition: opacity 1s ease;
+      animation: float 3s ease-in-out infinite;
     }
-
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
     .photo.active {
       opacity: 1;
       z-index: 1;
@@ -108,16 +114,30 @@
     /* Responsivitas */
     @media (max-width: 768px) {
       .photo-wrapper {
-        width: 30%;
+        width: 25%;
+        max-width: 100px;
       }
-
+  
+      .photo {
+        max-height: 100px;
+      }
+  
       #message {
-        font-size: 2rem;
+        font-size: 1.5rem;
         margin-top: 10vh;
+        padding: 0 10px;
       }
-
+  
       #button-container {
         margin-top: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+  
+      .btn {
+        font-size: 1.2rem;
+        margin: 10px 5px;
+        padding: 8px 16px;
       }
     }
   </style>
