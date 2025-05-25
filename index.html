@@ -7,8 +7,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-color: #f8bbd0;
-      --text-color: #4e342e;
+      --primary-color: #87ceeb; /* Biru laut terang */
+      --secondary-color: #4682b4; /* Biru laut sedang */
+      --text-color: #003366; /* Biru gelap untuk teks */
       --btn-bg: rgba(255,255,255,0.6);
       --btn-hover-bg: rgba(255,255,255,0.8);
     }
@@ -18,9 +19,22 @@
     html, body {
       width:100%; height:100%;
       font-family: 'Dancing Script', cursive;
-      background: var(--primary-color);
+      /* HAPUS BARIS INI: */
+      /* background: var(--primary-color); */
+      
+      /* --- GANTI DENGAN KODE INI UNTUK BACKGROUND FOTO --- */
+      background: url('bg.png') no-repeat center center fixed; /* Menggunakan foto sebagai background */
+      -webkit-background-size: cover; /* Untuk browser webkit */
+      -moz-background-size: cover;    /* Untuk browser mozilla */
+      -o-background-size: cover;      /* Untuk browser opera */
+      background-size: cover;         /* Ukuran cover untuk mengisi seluruh area */
+      /* --- AKHIR KODE BACKGROUND FOTO --- */
+
       overflow: hidden;
       position: relative;
+      
+      /* Kursor hiu (jika sudah ditambahkan) */
+      cursor: url('shark_cursor.png'), auto; 
     }
 
     #message {
@@ -32,7 +46,7 @@
       text-shadow:1px 1px 4px rgba(255,255,255,0.6);
       min-height: 3em;
       overflow: visible; /* Biarkan teks wrap */
-      animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+      /* Animasi typing akan dikontrol oleh JS */
     }
 
     @keyframes typing {
@@ -114,6 +128,31 @@
       z-index: 0;
     }
 
+    /* --- CSS untuk Stiker Hiu --- */
+    .shark-sticker {
+      position: absolute;
+      width: 100px; /* Ukuran hiu */
+      height: auto;
+      pointer-events: none; /* Tidak bisa diklik */
+      z-index: 8; /* Di bawah teks/tombol, di atas partikel */
+      opacity: 0.8; /* Sedikit transparan */
+      transition: transform 0.5s ease-out, opacity 0.5s ease; /* Jaga transisi ini */
+    }
+
+    .shark-sticker img {
+      width: 100%;
+      height: auto;
+      transform-origin: center; /* Titik putar di tengah */
+    }
+
+    /* Animasi untuk hiu agar mengambang */
+    @keyframes swim {
+      0%, 100% { transform: translate(0, 0) rotateZ(0deg); }
+      25% { transform: translate(5px, -5px) rotateZ(2deg); }
+      50% { transform: translate(0, 5px) rotateZ(-2deg); }
+      75% { transform: translate(-5px, -5px) rotateZ(1deg); }
+    }
+
     /* Responsivitas */
     @media (max-width: 768px) {
       .photo-wrapper {
@@ -144,6 +183,11 @@
         margin: 10px 5px;
         padding: 8px 16px;
       }
+
+      /* Responsivitas untuk hiu */
+      .shark-sticker {
+        width: 70px; /* Ukuran hiu lebih kecil di layar kecil */
+      }
     }
   </style>
 </head>
@@ -158,7 +202,6 @@
     <button id="unmute-btn" class="btn" style="display: none;">🔊 Aktifkan Suara</button>
   </div>
 
-  <!-- Foto -->
   <div class="photo-wrapper" id="wrap1">
     <img class="photo layer0" src="bg1.jpg" alt="">
     <img class="photo layer1" src="bg2.jpg" alt="">
@@ -172,6 +215,10 @@
     <img class="photo layer1" src="bg6.jpg" alt="">
   </div>
 
+  <div class="shark-sticker" id="shark1"><img src="shark1.png" alt="Cute Shark 1"></div>
+  <div class="shark-sticker" id="shark2"><img src="shark2.png" alt="Cute Shark 2"></div>
+  <div class="shark-sticker" id="shark3"><img src="shark3.png" alt="Cute Shark 3"></div>
+  <div class="shark-sticker" id="shark4"><img src="shark4.png" alt="Cute Shark 4"></div>
   <audio id="audio" loop muted>
     <source src="lagu.mp3" type="audio/mpeg">
   </audio>
@@ -196,24 +243,32 @@
   const audio = document.getElementById('audio');
   const unmuteBtn = document.getElementById('unmute-btn');
   const nextBtn = document.getElementById('next');
-  const prevBtn = document.getElementById('prev'); // Ambil elemen tombol prev
+  const prevBtn = document.getElementById('prev');
   let msgIdx = 0;
+  let typingInterval; // Variabel untuk menyimpan ID interval pengetikan
+
+  const sharkStickers = document.querySelectorAll('.shark-sticker');
 
   // Fungsi untuk menampilkan pesan dengan efek mengetik
   function startTyping(text, element, speed = 100) {
-    let i = 0;
+    // Hentikan interval pengetikan sebelumnya jika ada
+    if (typingInterval) {
+      clearInterval(typingInterval);
+    }
+
     element.textContent = ''; // Kosongkan teks sebelum mengetik
     element.style.animation = 'none'; // Reset animasi CSS typing
     void element.offsetWidth; // Trigger reflow untuk mereset animasi
-    element.style.animation = 'typing 3.5s steps(40, end), blink-caret .75s step-end infinite';
+    element.style.animation = 'typing 3.5s steps(40, end), blink-caret .75s step-end infinite'; // Mulai animasi CSS lagi
 
     let charIndex = 0;
-    const typingInterval = setInterval(() => {
+    typingInterval = setInterval(() => { // Simpan ID interval
       if (charIndex < text.length) {
         element.textContent += text.charAt(charIndex);
         charIndex++;
       } else {
         clearInterval(typingInterval);
+        typingInterval = null; // Reset ID interval setelah selesai
       }
     }, speed);
   }
@@ -227,27 +282,40 @@
     }
   }
 
+  // Fungsi untuk mengelola visibilitas tombol Back
+  function updateBackButtonVisibility() {
+    if (msgIdx === 0) {
+      prevBtn.style.display = 'none'; // Sembunyikan tombol Back pada pesan pertama
+    } else {
+      prevBtn.style.display = 'inline-block'; // Tampilkan tombol Back
+    }
+  }
+
   // Fungsi untuk merender pesan dan memperbarui tombol
   function renderMessageAndButtons() {
     startTyping(messages[msgIdx], msgEl, 100);
     updateNextButtonText();
+    updateBackButtonVisibility();
   }
 
   // Event listener untuk tombol Next
   nextBtn.onclick = () => {
+    // Bersihkan teks saat tombol ditekan untuk menghindari tumpang tindih
+    msgEl.textContent = '';
+    if (typingInterval) { // Hentikan animasi sebelumnya
+        clearInterval(typingInterval);
+        typingInterval = null;
+    }
+
     if (msgIdx === messages.length - 1) { // Jika sudah di pesan terakhir
-      // Coba tutup jendela/tab
       window.close();
-      // Beri tahu pengguna jika tidak bisa ditutup otomatis
       alert("Halaman ini mungkin tidak bisa ditutup secara otomatis oleh browser Anda. Anda bisa menutupnya secara manual.");
     } else {
       msgIdx = (msgIdx + 1); // Pindah ke pesan berikutnya
       renderMessageAndButtons();
-      // Pastikan audio diputar jika belum
-      if (audio.paused && !audio.muted) { // Hanya putar jika belum diputar dan tidak dimatikan
+      if (audio.paused && !audio.muted) {
         audio.play().catch(error => {
           console.log("Audio play was prevented:", error);
-          // Jika play gagal, kemungkinan karena belum ada interaksi, munculkan tombol unmute
           unmuteBtn.style.display = 'inline-block';
         });
       }
@@ -256,18 +324,24 @@
 
   // Event listener untuk tombol Back
   prevBtn.onclick = () => {
+    // Bersihkan teks saat tombol ditekan untuk menghindari tumpang tindih
+    msgEl.textContent = '';
+    if (typingInterval) { // Hentikan animasi sebelumnya
+        clearInterval(typingInterval);
+        typingInterval = null;
+    }
+
     msgIdx = (msgIdx - 1 + messages.length) % messages.length; // Pindah ke pesan sebelumnya
     renderMessageAndButtons();
   };
 
   // Event listener untuk tombol unmute
   unmuteBtn.onclick = () => {
-    audio.muted = false; // Nonaktifkan mute
+    audio.muted = false;
     audio.play().then(() => {
-      unmuteBtn.style.display = 'none'; // Sembunyikan tombol setelah diputar
+      unmuteBtn.style.display = 'none';
     }).catch(error => {
       console.log("Audio play was prevented even after unmute click:", error);
-      // Jika masih gagal (misalnya karena browser masih butuh interaksi lain), mungkin ada pesan lain di konsol
     });
   };
 
@@ -277,53 +351,86 @@
       const wrap = document.getElementById(`wrap${i + 1}`);
       const layers = wrap.querySelectorAll('img');
 
-      // Tentukan layer aktif dan layer berikutnya
       const [current, next] = layers[0].classList.contains('active')
         ? [layers[0], layers[1]]
         : [layers[1], layers[0]];
 
-      // Pilih foto acak baru
       const randomIndex = Math.floor(Math.random() * photoList.length);
       next.src = photoList[randomIndex];
 
-      // Transisikan kelas active
       next.classList.add('active');
       current.classList.remove('active');
     }
   }
 
+  // Fungsi untuk membuat hiu berenang secara dinamis
+  function animateSharks() {
+    sharkStickers.forEach(shark => {
+      // Dapatkan lebar dan tinggi jendela
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Hitung posisi acak baru yang memastikan hiu sepenuhnya di dalam viewport
+      // Kurangi lebar/tinggi hiu agar tidak keluar layar
+      const targetX = Math.random() * (viewportWidth - shark.offsetWidth);
+      const targetY = Math.random() * (viewportHeight - shark.offsetHeight);
+
+      // Hitung durasi animasi berdasarkan jarak (untuk kecepatan yang lebih konsisten)
+      const currentX = shark.offsetLeft;
+      const currentY = shark.offsetTop;
+      const distance = Math.sqrt(Math.pow(targetX - currentX, 2) + Math.pow(targetY - currentY, 2));
+      const duration = (distance / 50) + 3; // Kecepatan 50 piksel/detik, minimal 3 detik
+
+      // Rotasi acak untuk memberi variasi arah
+      const randomRotation = (Math.random() * 360); // 0-360 derajat
+
+      // Terapkan transisi untuk animasi pergerakan
+      shark.style.transition = `left ${duration}s linear, top ${duration}s linear, transform 0.5s ease`;
+      shark.style.left = `${targetX}px`;
+      shark.style.top = `${targetY}px`;
+      shark.style.transform = `rotateZ(${randomRotation}deg)`; // Set rotasi baru
+    });
+  }
+
+
   // Inisialisasi saat halaman dimuat
   window.onload = () => {
-    // Coba putar audio saat halaman dimuat. Jika gagal (karena kebijakan browser), tampilkan tombol unmute.
-    audio.muted = true; // Mulai dengan muted agar bisa mencoba play tanpa interaksi awal
+    // Coba putar audio
+    audio.muted = true;
     audio.play().then(() => {
-      audio.muted = false; // Jika berhasil, unmute
-      unmuteBtn.style.display = 'none'; // Sembunyikan tombol unmute
+      audio.muted = false;
+      unmuteBtn.style.display = 'none';
     }).catch(error => {
       console.log("Auto play audio blocked. Showing unmute button.", error);
-      unmuteBtn.style.display = 'inline-block'; // Tampilkan tombol unmute
+      unmuteBtn.style.display = 'inline-block';
     });
 
     renderMessageAndButtons(); // Tampilkan pesan pertama dan perbarui tombol
-    updatePhotos(); // Tampilkan foto pertama kali
-    setInterval(updatePhotos, 5000); // Ganti foto setiap 5 detik
+    updatePhotos();
+    setInterval(updatePhotos, 5000);
 
-    // Inisialisasi particles.js
+    // Panggil animateSharks pertama kali dan kemudian setiap 5-10 detik
+    animateSharks();
+    setInterval(animateSharks, 8000); // Gerakkan hiu setiap 8 detik
+
+    // Konfigurasi particles.js untuk gelembung
     particlesJS("particles-js", {
       "particles": {
-        "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
-        "color": { "value": ["#ffffff", "#ffb6c1", "#ffc0cb"] },
+        "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+        "color": { "value": ["#ffffff", "#add8e6", "#e0ffff"] }, /* Warna putih kebiruan */
         "shape": { "type": "circle" },
-        "opacity": { "value": 0.4, "random": true },
-        "size": { "value": 3.5, "random": true },
+        "opacity": { "value": 0.6, "random": true },
+        "size": { "value": 5, "random": true, "anim": { "enable": true, "speed": 4, "size_min": 0.3, "sync": false } },
         "line_linked": { "enable": false },
         "move": {
           "enable": true,
-          "speed": 0.5,
-          "direction": "none",
+          "speed": 1.5, /* Kecepatan lebih lambat */
+          "direction": "top", /* Bergerak ke atas seperti gelembung */
           "random": true,
           "straight": false,
-          "out_mode": "out"
+          "out_mode": "out",
+          "bounce": false,
+          "attract": { "enable": false, "rotateX": 600, "rotateY": 1200 }
         }
       },
       "interactivity": {
