@@ -177,95 +177,138 @@
   </audio>
 
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.5.2/particles.min.js"></script>
-  <script>
-    const messages = [
-      "Selamat ulang tahun, sayang! 🎂",
-      "Hari ini aku mau bilang…",
-      "Terima kasih sudah selalu ada di sisiku.",
-      "Aku mencintaimu lebih dari kata-kata bisa ungkapkan ❤️",
-      "Semoga apa yang ayang cita-citakan, semua doa ayang terkabul, aamiin",
-      "Luv u Sayangkuu, cintakuuu, cantikkuuu"
-    ];
+<script>
+  const messages = [
+    "Selamat ulang tahun, sayang! 🎂",
+    "Hari ini aku mau bilang…",
+    "Terima kasih sudah selalu ada di sisiku.",
+    "Aku mencintaimu lebih dari kata-kata bisa ungkapkan ❤️",
+    "Semoga apa yang ayang cita-citakan, semua doa ayang terkabul, aamiin",
+    "Luv u Sayangkuu, cintakuuu, cantikkuuu"
+  ];
 
-    const photoList = [
-      "bg1.jpg", "bg2.jpg", "bg3.jpg", "bg4.jpg", "bg5.jpg",
-      "bg6.jpg", "bg7.jpg", "bg8.jpg", "bg9.jpg", "bg10.jpg"
-    ];
+  const photoList = [
+    "bg1.jpg", "bg2.jpg", "bg3.jpg", "bg4.jpg", "bg5.jpg",
+    "bg6.jpg", "bg7.jpg", "bg8.jpg", "bg9.jpg", "bg10.jpg"
+  ];
 
-    const msgEl = document.getElementById('message');
-    const audio = document.getElementById('audio');
-    const unmuteBtn = document.getElementById('unmute-btn');
-    let msgIdx = 0;
+  const msgEl = document.getElementById('message');
+  const audio = document.getElementById('audio');
+  const unmuteBtn = document.getElementById('unmute-btn');
+  const nextBtn = document.getElementById('next');
+  const prevBtn = document.getElementById('prev'); // Ambil elemen tombol prev
+  let msgIdx = 0;
 
-    function renderMessage() {
-      msgEl.textContent = '';
-      msgEl.style.animation = 'none';
-      void msgEl.offsetWidth;
-      msgEl.style.animation = 'typing 3.5s steps(40, end), blink-caret .75s step-end infinite';
+  // Fungsi untuk menampilkan pesan dengan efek mengetik
+  function startTyping(text, element, speed = 100) {
+    let i = 0;
+    element.textContent = ''; // Kosongkan teks sebelum mengetik
+    element.style.animation = 'none'; // Reset animasi CSS typing
+    void element.offsetWidth; // Trigger reflow untuk mereset animasi
+    element.style.animation = 'typing 3.5s steps(40, end), blink-caret .75s step-end infinite';
 
-      setTimeout(() => {
-        msgEl.classList.add('typing-complete');
-      }, 3500);
-    }
-
-    function startTyping(text, element, speed = 100) {
-      let i = 0;
-      element.textContent = '';
-      function type() {
-        if (i < text.length) {
-          element.textContent += text.charAt(i);
-          i++;
-          setTimeout(type, speed);
-        }
+    let charIndex = 0;
+    const typingInterval = setInterval(() => {
+      if (charIndex < text.length) {
+        element.textContent += text.charAt(charIndex);
+        charIndex++;
+      } else {
+        clearInterval(typingInterval);
       }
-      type();
+    }, speed);
+  }
+
+  // Fungsi untuk memperbarui teks tombol Next/Finish
+  function updateNextButtonText() {
+    if (msgIdx === messages.length - 1) {
+      nextBtn.textContent = 'Finish';
+    } else {
+      nextBtn.textContent = 'Next';
     }
+  }
 
-    document.getElementById('next').onclick = () => {
-      msgIdx = (msgIdx + 1) % messages.length;
-      renderMessage();
-      startTyping(messages[msgIdx], msgEl, 100);
-      if (audio.paused) audio.play();
-    };
+  // Fungsi untuk merender pesan dan memperbarui tombol
+  function renderMessageAndButtons() {
+    startTyping(messages[msgIdx], msgEl, 100);
+    updateNextButtonText();
+  }
 
-    document.getElementById('prev').onclick = () => {
-      msgIdx = (msgIdx - 1 + messages.length) % messages.length;
-      renderMessage();
-      startTyping(messages[msgIdx], msgEl, 100);
-    };
-
-    function updatePhotos() {
-      for (let i = 0; i < 3; i++) {
-        const wrap = document.getElementById(`wrap${i + 1}`);
-        const layers = wrap.querySelectorAll('img');
-
-        const [current, next] = layers[0].classList.contains('active') 
-          ? [layers[0], layers[1]] 
-          : [layers[1], layers[0]];
-
-        const randomIndex = Math.floor(Math.random() * photoList.length);
-        next.src = photoList[randomIndex];
-        next.classList.add('active');
-        current.classList.remove('active');
+  // Event listener untuk tombol Next
+  nextBtn.onclick = () => {
+    if (msgIdx === messages.length - 1) { // Jika sudah di pesan terakhir
+      // Coba tutup jendela/tab
+      window.close();
+      // Beri tahu pengguna jika tidak bisa ditutup otomatis
+      alert("Halaman ini mungkin tidak bisa ditutup secara otomatis oleh browser Anda. Anda bisa menutupnya secara manual.");
+    } else {
+      msgIdx = (msgIdx + 1); // Pindah ke pesan berikutnya
+      renderMessageAndButtons();
+      // Pastikan audio diputar jika belum
+      if (audio.paused && !audio.muted) { // Hanya putar jika belum diputar dan tidak dimatikan
+        audio.play().catch(error => {
+          console.log("Audio play was prevented:", error);
+          // Jika play gagal, kemungkinan karena belum ada interaksi, munculkan tombol unmute
+          unmuteBtn.style.display = 'inline-block';
+        });
       }
     }
+  };
 
-    window.onload = () => {
-      audio.play().catch(error => {
-        console.error("Gagal memutar audio:", error);
-      });
+  // Event listener untuk tombol Back
+  prevBtn.onclick = () => {
+    msgIdx = (msgIdx - 1 + messages.length) % messages.length; // Pindah ke pesan sebelumnya
+    renderMessageAndButtons();
+  };
 
-      renderMessage();
-      startTyping(messages[msgIdx], msgEl, 100);
-      updatePhotos();
-      setInterval(updatePhotos, 5000);
+  // Event listener untuk tombol unmute
+  unmuteBtn.onclick = () => {
+    audio.muted = false; // Nonaktifkan mute
+    audio.play().then(() => {
+      unmuteBtn.style.display = 'none'; // Sembunyikan tombol setelah diputar
+    }).catch(error => {
+      console.log("Audio play was prevented even after unmute click:", error);
+      // Jika masih gagal (misalnya karena browser masih butuh interaksi lain), mungkin ada pesan lain di konsol
+    });
+  };
 
-      // Tampilkan tombol unmute setelah audio mulai
-      audio.onplay = () => {
-        unmuteBtn.style.display = 'inline-block';
-      };
-    };
+  // Fungsi untuk memperbarui foto secara acak
+  function updatePhotos() {
+    for (let i = 0; i < 3; i++) {
+      const wrap = document.getElementById(`wrap${i + 1}`);
+      const layers = wrap.querySelectorAll('img');
 
+      // Tentukan layer aktif dan layer berikutnya
+      const [current, next] = layers[0].classList.contains('active')
+        ? [layers[0], layers[1]]
+        : [layers[1], layers[0]];
+
+      // Pilih foto acak baru
+      const randomIndex = Math.floor(Math.random() * photoList.length);
+      next.src = photoList[randomIndex];
+
+      // Transisikan kelas active
+      next.classList.add('active');
+      current.classList.remove('active');
+    }
+  }
+
+  // Inisialisasi saat halaman dimuat
+  window.onload = () => {
+    // Coba putar audio saat halaman dimuat. Jika gagal (karena kebijakan browser), tampilkan tombol unmute.
+    audio.muted = true; // Mulai dengan muted agar bisa mencoba play tanpa interaksi awal
+    audio.play().then(() => {
+      audio.muted = false; // Jika berhasil, unmute
+      unmuteBtn.style.display = 'none'; // Sembunyikan tombol unmute
+    }).catch(error => {
+      console.log("Auto play audio blocked. Showing unmute button.", error);
+      unmuteBtn.style.display = 'inline-block'; // Tampilkan tombol unmute
+    });
+
+    renderMessageAndButtons(); // Tampilkan pesan pertama dan perbarui tombol
+    updatePhotos(); // Tampilkan foto pertama kali
+    setInterval(updatePhotos, 5000); // Ganti foto setiap 5 detik
+
+    // Inisialisasi particles.js
     particlesJS("particles-js", {
       "particles": {
         "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
@@ -293,6 +336,7 @@
       },
       "retina_detect": true
     });
-  </script>
+  };
+</script>
 </body>
 </html>
